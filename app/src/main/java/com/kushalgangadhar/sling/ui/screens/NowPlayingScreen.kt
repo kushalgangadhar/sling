@@ -21,6 +21,15 @@ import com.kushalgangadhar.sling.utils.VisualizerHelper
 import kotlin.math.abs
 import kotlin.math.hypot
 
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import com.kushalgangadhar.sling.utils.TimerHelper
+
+
 @Composable
 fun AudioVisualizer(
     visualizerHelper: VisualizerHelper,
@@ -71,4 +80,59 @@ fun AudioVisualizer(
             }
         }
     }
+}
+
+
+@Composable
+fun SleepTimerDialog(
+    onDismissRequest: () -> Unit
+) {
+    val context = LocalContext.current
+
+    // The options we want to show the user
+    val timerOptions = listOf(5, 15, 30, 45, 60)
+
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = {
+            Text(text = "Sleep Timer")
+        },
+        text = {
+            Column {
+                Text(text = "Stop audio playback after:")
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Create a button for each time option
+                timerOptions.forEach { minutes ->
+                    TextButton(
+                        onClick = {
+                            TimerHelper.startSleepTimer(context, minutes.toLong())
+                            onDismissRequest() // Close the dialog
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("$minutes Minutes")
+                    }
+                }
+
+                Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+                // Add an option to explicitly cancel any active timer
+                TextButton(
+                    onClick = {
+                        TimerHelper.cancelSleepTimer(context)
+                        onDismissRequest() // Close the dialog
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Turn Off Timer", color = MaterialTheme.colorScheme.error)
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text("Cancel")
+            }
+        }
+    )
 }
